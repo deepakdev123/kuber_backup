@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tomcat
+  namespace: dev-ns
+spec:
+  replicas: 3
+  selector:
+   matchLabels:
+     app: tomcat
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      name: tomcat-nginx
+      labels:
+        app: tomcat
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                - key: size
+                  operator: In
+                  values:
+                    - large
+                    - small
+      containers:
+        - name: tomcat
+          image: deepakdev123/tomcat_deploy:2.2.2
+          resources:
+            limits:
+              cpu: "1"
+              memory: 256Mi
+            requests:
+              cpu: 500m
+              memory: 128Mi
